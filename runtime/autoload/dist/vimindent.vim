@@ -258,9 +258,9 @@ patterns =<< trim END
     try
     cat\%[ch]
     fina\|finally\=
-    \%(export\s\+\|\%(public\s\+\)\=\%(static\s\+\)\=\)\=def
+    \%(export\s\+\|\%(public\s\+\)\=static\s\+\)\=def
     fu\%[nction]\%x28\@!
-    \%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class
+    \%(\%(export\s\+\)\=abstract\s\+\)\=class
     interface
     enum
     aug\%[roup]\%(\s\+[eE][nN][dD]\)\@!\s\+\S\+
@@ -290,12 +290,12 @@ const START_MIDDLE_END: dict<list<string>> = {
     catch: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
     finally: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
     endtry: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
-    def: ['\%(export\s\+\|\%(public\s\+\)\=\%(static\s\+\)\=\)\=def', '', 'enddef'],
-    enddef: ['\%(export\s\+\|\%(public\s\+\)\=\%(static\s\+\)\=\)\=def', '', 'enddef'],
+    def: ['\%(export\s\+\|\%(public\s\+\)\=static\s\+\)\=def', '', 'enddef'],
+    enddef: ['\%(export\s\+\|\%(public\s\+\)\=static\s\+\)\=def', '', 'enddef'],
     function: ['fu\%[nction]', '', 'endf\%[unction]'],
     endfunction: ['fu\%[nction]', '', 'endf\%[unction]'],
-    class: ['\%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class', '', 'endclass'],
-    endclass: ['\%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class', '', 'endclass'],
+    class: ['\%(\%(export\s\+\)\=abstract\s\+\)\=class', '', 'endclass'],
+    endclass: ['\%(\%(export\s\+\)\=abstract\s\+\)\=class', '', 'endclass'],
     interface: ['\%(export\s\+\)\=interface', '', 'endinterface'],
     endinterface: ['\%(export\s\+\)\=interface', '', 'endinterface'],
     enum: ['enum', '', 'endenum'],
