@@ -2,7 +2,7 @@ vim9script
 
 # Language:     Vim script
 # Maintainer:   github user lacygoill
-# Last Change:  2023 Jan 03
+# Last Change:  2023 Jan 27
 
 # NOTE: Whenever you change the code, make sure the tests are still passing:
 #
@@ -145,9 +145,6 @@ const HEREDOC_OPERATOR: string = '\s=<<\s\@=\%(\s\+\%(trim\|eval\)\)\{,2}'
 # But sometimes, it can be too costly and cause `E363` to be given.
 const PATTERN_DELIMITER: string = '[-+*/%]\%(=\s\)\@!'
 
-# QUOTE {{{3
-
-const QUOTE: string = '["'']'
 # }}}2
 # Syntaxes {{{2
 # ASSIGNS_HEREDOC {{{3
@@ -201,8 +198,10 @@ const ENDS_BLOCK: string = '^\s*\%('
     .. '\|' .. 'endw\%[hile]'
     .. '\|' .. 'endt\%[ry]'
     .. '\|' .. 'enddef'
-    .. '\|' .. 'endclass'
     .. '\|' .. 'endf\%[unction]'
+    .. '\|' .. 'endclass'
+    .. '\|' .. 'endinterface'
+    .. '\|' .. 'endenum'
     .. '\|' .. 'aug\%[roup]\s\+[eE][nN][dD]'
     .. '\|' .. CLOSING_BRACKET
     .. $'\){END_OF_COMMAND}'
@@ -213,12 +212,14 @@ patterns =<< trim END
     en\%[dif]
     el\%[se]
     endfor\=
-    endclass
     endw\%[hile]
     endt\%[ry]
     fina\|finally\=
     enddef
     endf\%[unction]
+    endclass
+    endinterface
+    endenum
     aug\%[roup]\s\+[eE][nN][dD]
 END
 
@@ -253,13 +254,15 @@ patterns =<< trim END
     el\%[se]
     elseif\=
     for
-    class
     wh\%[ile]
     try
     cat\%[ch]
     fina\|finally\=
+    \%(export\s\+\|\%(\%(public\s\+\)\=\%(static\s\+\)\=\)\)\=def
     fu\%[nction]\%x28\@!
-    \%(export\s\+\)\=def
+    \%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class
+    interface
+    enum
     aug\%[roup]\%(\s\+[eE][nN][dD]\)\@!\s\+\S\+
 END
 const STARTS_NAMED_BLOCK: string = '^\s*\%(sil\%[ent]\s\+\)\=\%(' .. patterns->join('\|') .. '\)\>:\@!'
@@ -281,18 +284,22 @@ const START_MIDDLE_END: dict<list<string>> = {
     endif: ['if', 'el\%[se]\|elseif\=', 'en\%[dif]'],
     for: ['for', '', 'endfor\='],
     endfor: ['for', '', 'endfor\='],
-    class: ['class', '', 'endclass'],
-    endclass: ['class', '', 'endclass'],
     while: ['wh\%[ile]', '', 'endw\%[hile]'],
     endwhile: ['wh\%[ile]', '', 'endw\%[hile]'],
     try: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
     catch: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
     finally: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
     endtry: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
-    def: ['\%(export\s\+\)\=def', '', 'enddef'],
-    enddef: ['\%(export\s\+\)\=def', '', 'enddef'],
+    def: ['\%(export\s\+\|\%(\%(public\s\+\)\=\%(static\s\+\)\=\)\)\=def', '', 'enddef'],
+    enddef: ['\%(export\s\+\|\%(\%(public\s\+\)\=\%(static\s\+\)\=\)\)\=def', '', 'enddef'],
     function: ['fu\%[nction]', '', 'endf\%[unction]'],
     endfunction: ['fu\%[nction]', '', 'endf\%[unction]'],
+    class: ['\%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class', '', 'endclass'],
+    endclass: ['\%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class', '', 'endclass'],
+    interface: ['\%(export\s\+\)\=interface', '', 'endinterface'],
+    endinterface: ['\%(export\s\+\)\=interface', '', 'endinterface'],
+    enum: ['enum', '', 'endenum'],
+    endenum: ['enum', '', 'endenum'],
     augroup: ['aug\%[roup]\%(\s\+[eE][nN][dD]\)\@!\s\+\S\+', '', 'aug\%[roup]\s\+[eE][nN][dD]'],
 }->map((_, kwds: list<string>) =>
     kwds->map((_, kwd: string) => kwd == ''
@@ -392,6 +399,7 @@ export def Expr(lnum = v:lnum): number # {{{2
     endif
 
     if line_A->AtStartOf('FuncHeader')
+            && !IsInsideInterface()
         line_A.lnum->CacheFuncHeader()
     elseif line_A.lnum->IsInside('FuncHeader')
         return b:vimindent.startindent + 2 * shiftwidth()
@@ -536,8 +544,13 @@ def Offset( # {{{2
         line_B: dict<any>,
         ): number
 
+    if line_B->AtStartOf('FuncHeader')
+            && IsInsideInterface()
+        return 0
+
     # increase indentation inside a block
-    if line_B.text =~ STARTS_NAMED_BLOCK || line_B->EndsWithCurlyBlock()
+    elseif line_B.text =~ STARTS_NAMED_BLOCK
+            || line_B->EndsWithCurlyBlock()
         # But don't indent if the line starting the block also closes it.
         if line_B->AlsoClosesBlock()
             return 0
@@ -994,6 +1007,10 @@ def IsInside(lnum: number, syntax: string): bool # {{{3
     endif
 
     return lnum <= b:vimindent.endlnum
+enddef
+
+def IsInsideInterface(): bool # {{{3
+    return searchpair('interface', '', 'endinterface', 'nW') > 0
 enddef
 
 def IsRightBelow(lnum: number, syntax: string): bool # {{{3
