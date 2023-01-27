@@ -258,7 +258,7 @@ patterns =<< trim END
     try
     cat\%[ch]
     fina\|finally\=
-    \%(export\s\+\|\%(\%(public\s\+\)\=\%(static\s\+\)\=\)\)\=def
+    \%(export\s\+\|\%(public\s\+\)\=\%(static\s\+\)\=\)\=def
     fu\%[nction]\%x28\@!
     \%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class
     interface
@@ -290,8 +290,8 @@ const START_MIDDLE_END: dict<list<string>> = {
     catch: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
     finally: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
     endtry: ['try', 'cat\%[ch]\|fina\|finally\=', 'endt\%[ry]'],
-    def: ['\%(export\s\+\|\%(\%(public\s\+\)\=\%(static\s\+\)\=\)\)\=def', '', 'enddef'],
-    enddef: ['\%(export\s\+\|\%(\%(public\s\+\)\=\%(static\s\+\)\=\)\)\=def', '', 'enddef'],
+    def: ['\%(export\s\+\|\%(public\s\+\)\=\%(static\s\+\)\=\)\=def', '', 'enddef'],
+    enddef: ['\%(export\s\+\|\%(public\s\+\)\=\%(static\s\+\)\=\)\=def', '', 'enddef'],
     function: ['fu\%[nction]', '', 'endf\%[unction]'],
     endfunction: ['fu\%[nction]', '', 'endf\%[unction]'],
     class: ['\%(\%(export\s\+\)\=\%(abstract\s\+\)\=\)\=class', '', 'endclass'],
