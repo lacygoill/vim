@@ -738,7 +738,7 @@ wayland_prepare_read(void)
 }
 
 /*
- * Catch up on any qeueued events
+ * Catch up on any queued events
  */
     int
 wayland_update(void)
@@ -849,8 +849,6 @@ ex_wlrestore(exarg_T *eap)
 	smsg(_("restoring Wayland display %s"), wayland_display_name);
 
 #ifdef FEAT_WAYLAND_CLIPBOARD
-	clip_plus.did_warn = false;
-	clip_star.did_warn = false;
 	clip_init_wayland();
 #endif
     }
@@ -866,7 +864,7 @@ ex_wlrestore(exarg_T *eap)
 
 /*
  * Get a suitable data device manager from connection. "supported" should be
- * iniitialized to VWL_DATA_PROTOCOL_NONE beforehand. Returns NULL if there are
+ * initialized to VWL_DATA_PROTOCOL_NONE beforehand. Returns NULL if there are
  * no data device manager available with the required selection.
  */
     vwl_data_device_manager_T *

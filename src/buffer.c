@@ -516,6 +516,10 @@ can_unload_buffer(buf_T *buf)
 		break;
 	    }
     }
+    // Don't unload the buffer while it's still being saved
+    if (can_unload && buf->b_saving)
+	can_unload = FALSE;
+
     if (!can_unload)
     {
 	char_u *fname = buf->b_fname != NULL ? buf->b_fname : buf->b_ffname;
@@ -2476,9 +2480,7 @@ free_buf_options(
     ga_clear(&buf->b_kmap_ga);
 #endif
     clear_string_option(&buf->b_p_com);
-#ifdef FEAT_FOLDING
     clear_string_option(&buf->b_p_cms);
-#endif
     clear_string_option(&buf->b_p_nf);
 #ifdef FEAT_SYN_HL
     clear_string_option(&buf->b_p_syn);
@@ -2501,7 +2503,6 @@ free_buf_options(
     clear_string_option(&buf->b_p_cinw);
     clear_string_option(&buf->b_p_cot);
     clear_string_option(&buf->b_p_cpt);
-    clear_string_option(&buf->b_p_ise);
 #ifdef FEAT_COMPL_FUNC
     clear_string_option(&buf->b_p_cfu);
     free_callback(&buf->b_cfu_cb);
@@ -5430,7 +5431,7 @@ get_rel_pos(
     char tmp[8];
     // localized percentage value
     vim_snprintf(tmp, sizeof(tmp), _("%d%%"), perc);
-    return (int)vim_snprintf_safelen((char *)buf, buflen, _("%2s"), tmp);
+    return (int)vim_snprintf_safelen((char *)buf, buflen, _("%3s"), tmp);
 }
 
 /*

@@ -3701,6 +3701,12 @@ func Test_popupmenu_info_border()
   call term_sendkeys(buf, "a\<C-X>\<C-U>")
   call VerifyScreenDump(buf, 'Test_popupwin_infopopup_8', {})
 
+  " Test shadow
+  call term_sendkeys(buf, "\<Esc>")
+  call term_sendkeys(buf, ":set completepopup=border:off,shadow:on\<CR>")
+  call term_sendkeys(buf, "Sa\<C-X>\<C-U>")
+  call VerifyScreenDump(buf, 'Test_popupwin_infopopup_9', {})
+
   call term_sendkeys(buf, "\<Esc>")
   call StopVimInTerminal(buf)
 endfunc
@@ -3774,6 +3780,38 @@ func Test_popupmenu_info_align_menu()
   call term_sendkeys(buf, "Gotest text test text\<C-X>\<C-U>")
   call VerifyScreenDump(buf, 'Test_popupwin_infopopup_align_3', {})
 
+  call StopVimInTerminal(buf)
+endfunc
+
+func Test_popupmenu_info_align_item()
+  CheckScreendump
+  let lines =<< trim END
+    func Omni_test(findstart, base)
+        if a:findstart
+            return col(".")
+        endif
+        return [
+            \ #{word: "cp_match_array", info: "One\nTwo\nThree\nFour"},
+            \ #{word: "cp_str", info: "Five\nSix\nSeven\nEight"},
+            \ #{word: "cp_score", info: "Nine\nTen\nEleven\nTwelve"},
+            \ ]
+    endfunc
+    set completepopup=border:on,align:item
+    set cot=menu,menuone,popup,
+    set omnifunc=Omni_test
+    set number
+  END
+  call writefile(lines, 'XtestInfoPopupPos', 'D')
+  let buf = RunVimInTerminal('-S XtestInfoPopupPos', #{rows: 15})
+  call TermWait(buf, 25)
+
+  call term_sendkeys(buf, "A"..repeat("\<CR>", 12))
+  call TermWait(buf, 25)
+  call term_sendkeys(buf, "\<C-X>\<C-O>\<C-N>\<C-N>")
+  call TermWait(buf, 25)
+  call VerifyScreenDump(buf, 'Test_popupwin_infopopup_align_item_01', {})
+
+  call term_sendkeys(buf, "\<Esc>")
   call StopVimInTerminal(buf)
 endfunc
 

@@ -871,6 +871,7 @@ get_keystroke(void)
     int		save_mapped_ctrl_c = mapped_ctrl_c;
     int		waited = 0;
 
+    mod_mask = 0;
     mapped_ctrl_c = FALSE;	// mappings are not used here
     for (;;)
     {
@@ -974,7 +975,7 @@ get_keystroke(void)
     vim_free(buf);
 
     mapped_ctrl_c = save_mapped_ctrl_c;
-    return n;
+    return merge_modifyOtherKeys(n, &mod_mask);
 }
 
 // For overflow detection, add a digit safely to an int value.
@@ -1016,7 +1017,7 @@ get_number(
     ++allow_keys;		// no mapping here, but recognize keys
     for (;;)
     {
-	windgoto(msg_row, msg_col);
+	windgoto(msg_row, cmdline_col_off + msg_col);
 	c = safe_vgetc();
 	if (VIM_ISDIGIT(c))
 	{
@@ -2282,7 +2283,7 @@ prepare_to_exit(void)
     else
 #endif
     {
-	windgoto((int)Rows - 1, 0);
+	windgoto((int)Rows - 1, cmdline_col_off);
 
 	/*
 	 * Switch terminal mode back now, so messages end up on the "normal"

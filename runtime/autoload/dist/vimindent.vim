@@ -2,7 +2,7 @@ vim9script
 
 # Language:     Vim script
 # Maintainer:   github user lacygoill
-# Last Change:  2025 Sep 11
+# Last Change:  2025 Oct 09
 #
 # Includes changes from The Vim Project:
 

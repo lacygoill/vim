@@ -819,7 +819,7 @@ enddef
 def Test_complete_info()
   v9.CheckSourceDefAndScriptFailure(['complete_info("")'], ['E1013: Argument 1: type mismatch, expected list<string> but got string', 'E1211: List required for argument 1'])
   v9.CheckSourceDefAndScriptFailure(['complete_info({})'], ['E1013: Argument 1: type mismatch, expected list<string> but got dict<any>', 'E1211: List required for argument 1'])
-  assert_equal({'pum_visible': 0, 'mode': '', 'selected': -1, 'items': []}, complete_info())
+  assert_equal({'pum_visible': 0, 'mode': '', 'preinserted_text': '', 'selected': -1, 'items': []}, complete_info())
   assert_equal({'mode': '', 'items': []}, complete_info(['mode', 'items']))
 enddef
 
@@ -3469,6 +3469,14 @@ def Test_readfile()
   v9.CheckSourceDefAndScriptFailure(['readfile("a", 0z10)'], ['E1013: Argument 2: type mismatch, expected string but got blob', 'E1174: String required for argument 2'])
   v9.CheckSourceDefAndScriptFailure(['readfile("a", "b", "c")'], ['E1013: Argument 3: type mismatch, expected number but got string', 'E1210: Number required for argument 3'])
   v9.CheckSourceDefExecAndScriptFailure(['readfile("")'], 'E1175: Non-empty string required for argument 1')
+enddef
+
+def Test_redraw_listener_add()
+  v9.CheckSourceDefAndScriptFailure(['redraw_listener_add("1")'], ['E1013: Argument 1: type mismatch, expected dict<any> but got string', 'E1206: Dictionary required for argument 1'])
+enddef
+
+def Test_redraw_listener_remove()
+  v9.CheckSourceDefAndScriptFailure(['redraw_listener_remove("x")'], ['E1013: Argument 1: type mismatch, expected number but got string', 'E1210: Number required for argument 1'])
 enddef
 
 def Test_reduce()

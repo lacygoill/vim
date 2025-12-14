@@ -226,6 +226,14 @@ func Test_buffer_error()
   %bwipe
 endfunc
 
+func Test_bwipe_during_save()
+  set charconvert=execute('%bw!')
+  call assert_fails('write ++enc=lmao boom', 'E937:')
+
+  set charconvert&
+  %bwipe
+endfunc
+
 " Test for the status messages displayed when unloading, deleting or wiping
 " out buffers
 func Test_buffer_statusmsg()
@@ -623,17 +631,48 @@ func Test_switch_to_previously_viewed_buffer()
   vsplit
 
   call cursor(100, 3)
+  call assert_equal('100', getline('.'))
   edit Xotherbuf
   buffer Xviewbuf
   call assert_equal([0, 100, 3, 0], getpos('.'))
+  call assert_equal('100', getline('.'))
 
+  edit Xotherbuf
+  wincmd p
+  normal! gg10dd
+  wincmd p
+  buffer Xviewbuf
+  call assert_equal([0, 90, 3, 0], getpos('.'))
+  call assert_equal('100', getline('.'))
+
+  edit Xotherbuf
+  wincmd p
+  normal! ggP
+  wincmd p
+  buffer Xviewbuf
+  call assert_equal([0, 100, 3, 0], getpos('.'))
+  call assert_equal('100', getline('.'))
+
+  edit Xotherbuf
+  wincmd p
+  normal! 96gg10ddgg
+  wincmd p
+  buffer Xviewbuf
+  " The original cursor line was deleted, so cursor is restored to the start
+  " of the line before the deleted range.
+  call assert_equal([0, 95, 1, 0], getpos('.'))
+  call assert_equal('95', getline('.'))
+
+  normal! u
   exe win_id2win(oldwin) .. 'close'
   setlocal bufhidden=hide
 
   call cursor(200, 3)
+  call assert_equal('200', getline('.'))
   edit Xotherbuf
   buffer Xviewbuf
   call assert_equal([0, 200, 3, 0], getpos('.'))
+  call assert_equal('200', getline('.'))
 
   bwipe! Xotherbuf
   bwipe! Xviewbuf

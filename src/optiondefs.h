@@ -48,9 +48,7 @@
 #define PV_CINSD	OPT_BUF(BV_CINSD)
 #define PV_CINW		OPT_BUF(BV_CINW)
 #define PV_CM		OPT_BOTH(OPT_BUF(BV_CM))
-#ifdef FEAT_FOLDING
-# define PV_CMS		OPT_BUF(BV_CMS)
-#endif
+#define PV_CMS		OPT_BUF(BV_CMS)
 #define PV_COM		OPT_BUF(BV_COM)
 #define PV_COT		OPT_BOTH(OPT_BUF(BV_COT))
 #define PV_CPT		OPT_BUF(BV_CPT)
@@ -95,7 +93,6 @@
 # define PV_INEX	OPT_BUF(BV_INEX)
 #endif
 #define PV_INF		OPT_BUF(BV_INF)
-#define PV_ISE		OPT_BOTH(OPT_BUF(BV_ISE))
 #define PV_ISK		OPT_BUF(BV_ISK)
 #ifdef FEAT_CRYPT
 # define PV_KEY		OPT_BUF(BV_KEY)
@@ -635,14 +632,14 @@ static struct vimoption options[] =
 #endif
 			    SCTX_INIT},
     {"clipmethod", "cpm",   P_STRING|P_VI_DEF|P_ONECOMMA|P_NODUP,
-#ifdef FEAT_CLIPBOARD
+#ifdef HAVE_CLIPMETHOD
 			    (char_u *)&p_cpm, PV_NONE, did_set_clipmethod, expand_set_clipmethod,
 # ifdef UNIX
-			    {(char_u *)"wayland,x11,gui,other", (char_u *)0L}
+			    {(char_u *)"wayland,x11", (char_u *)0L}
 # elif defined(VMS)
-			    {(char_u *)"x11,gui,other", (char_u *)0L}
+			    {(char_u *)"x11", (char_u *)0L}
 # else
-			    {(char_u *)"gui,other", (char_u *)0L}
+			    {(char_u *)"", (char_u *)0L}
 # endif
 #else
 			    (char_u *)NULL, PV_NONE, NULL, NULL,
@@ -671,13 +668,8 @@ static struct vimoption options[] =
 				(char_u *)0L}
 			    SCTX_INIT},
     {"commentstring", "cms", P_STRING|P_ALLOCED|P_VI_DEF,
-#ifdef FEAT_FOLDING
 			    (char_u *)&p_cms, PV_CMS, did_set_commentstring, NULL,
 			    {(char_u *)"/* %s */", (char_u *)0L}
-#else
-			    (char_u *)NULL, PV_NONE, NULL, NULL,
-			    {(char_u *)0L, (char_u *)0L}
-#endif
 			    SCTX_INIT},
 			    // P_PRI_MKRC isn't needed here, optval_default()
 			    // always returns TRUE for 'compatible'
@@ -711,7 +703,7 @@ static struct vimoption options[] =
 			    SCTX_INIT},
     {"completepopup", "cpp", P_STRING|P_VI_DEF|P_COMMA|P_NODUP|P_COLON,
 #if defined(FEAT_PROP_POPUP) && defined(FEAT_QUICKFIX)
-			    (char_u *)&p_cpp, PV_NONE, did_set_completepopup, expand_set_popupoption,
+			    (char_u *)&p_cpp, PV_NONE, did_set_completepopup, expand_set_completepopup,
 			    {(char_u *)"", (char_u *)0L}
 #else
 			    (char_u *)NULL, PV_NONE, NULL, NULL,
@@ -1500,10 +1492,6 @@ static struct vimoption options[] =
     {"insertmode",  "im",   P_BOOL|P_VI_DEF|P_VIM,
 			    (char_u *)&p_im, PV_NONE, did_set_insertmode, NULL,
 			    {(char_u *)FALSE, (char_u *)0L} SCTX_INIT},
-    {"isexpand",    "ise",  P_STRING|P_VI_DEF|P_ONECOMMA|P_NODUP,
-			    (char_u *)&p_ise, PV_ISE, did_set_isexpand, NULL,
-			    {(char_u *)"", (char_u *)0L}
-			    SCTX_INIT},
     {"isfname",	    "isf",  P_STRING|P_VI_DEF|P_COMMA|P_NODUP,
 			    (char_u *)&p_isf, PV_NONE, did_set_isopt, NULL,
 			    {
@@ -1991,7 +1979,7 @@ static struct vimoption options[] =
 			    {(char_u *)12L, (char_u *)0L} SCTX_INIT},
     {"previewpopup", "pvp", P_STRING|P_VI_DEF|P_COMMA|P_NODUP|P_COLON,
 #ifdef FEAT_PROP_POPUP
-			    (char_u *)&p_pvp, PV_NONE, did_set_previewpopup, expand_set_popupoption,
+			    (char_u *)&p_pvp, PV_NONE, did_set_previewpopup, expand_set_previewpopup,
 			    {(char_u *)"", (char_u *)0L}
 #else
 			    (char_u *)NULL, PV_NONE, NULL, NULL,
